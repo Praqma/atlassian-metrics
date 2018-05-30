@@ -1,0 +1,21 @@
+version: '3'
+network:
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+    - "9090:9090"
+    volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+    - tis
+  teamsinspace:
+    image: praqma/tis:use-prometheus-plugin
+    ports:
+    - "2430:2430"
+    - "7990:7990"
+    - "8060:8060"
+    - "8080:8080"
+    - "8085:8085"
+    - "8090:8090"
