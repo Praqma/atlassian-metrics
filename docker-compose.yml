@@ -1,6 +1,4 @@
 version: '3'
-network:
-
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -9,7 +7,7 @@ services:
     volumes:
     - ./prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
-    - tis
+    - teamsinspace
   teamsinspace:
     image: praqma/tis:use-prometheus-plugin
     ports:
