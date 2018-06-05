@@ -35,5 +35,5 @@ import javax.ws.rs.core.Response
 getInactiveIssues(  //  the name of the REST endpoint, which forms part of the URL
     httpMethod: "GET", groups: ["jira-administrators"]  // configuration of the endpoint, in this case which HTTP verb to handle, and what groups to allow
 ) { MultivaluedMap queryParams, String body ->  // parameters which are provided to your method body
-    return Response.ok(new JsonBuilder([inactive_issues_count: results.total]).toString()).build()  // the body of your method, where you will return a javax.ws.rs.core.Response object 
+    return Response.ok(new JsonBuilder([inactive_issues_count: results.total]).toString()).build()  // the body of your method, where you will return a javax.ws.rs.core.Response object
 }
