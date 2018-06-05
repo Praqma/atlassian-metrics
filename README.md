@@ -12,8 +12,6 @@ It expose some key metrics on a REST endpoint. Most of the metrics are of operat
 
 * [ScriptRunner for Jira](https://marketplace.atlassian.com/apps/6820/scriptrunner-for-jira?hosting=server&tab=overview)
 
-We can serve customize JQL results on a REST endpoint as well. We must make the exported data or metrics compatible for Prometheus.
-
 ## Components
 
 * Atlassian Jira, our source of data or metrics being exported for Prometheus.
@@ -63,7 +61,13 @@ start-jira.sh
 
 * After indexing completed, check if the JQL query is working properly: `http://jira.teamsinspace.com:8080/issues/?jql=(project%20%3D%20TIS%20and%20assignee%20!%3D%20currentUser()%20and%20updated%20<%3D%20-7d%20and%20resolution%20is%20EMPTY)`
 
-JQL results should return `89` issues. We can use the same JQL in [get_jira_issues_rest_endpoint.groovy](get_jira_issues_rest_endpoint.groovy) file for ScriptRunner.
+JQL results should return `89` issues.
+
+### JQL
+
+We can serve customize JQL results on a REST endpoint as well. We must make the exported data or metrics compatible for Prometheus.
+
+We can use the similar JQL in [get_jira_issues_rest_endpoint.groovy](get_jira_issues_rest_endpoint.groovy) file for ScriptRunner.
 
 ### ScriptRunner
 
