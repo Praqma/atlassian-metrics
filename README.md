@@ -29,9 +29,9 @@ It expose some key metrics on a REST endpoint. Most of the metrics are of operat
 * Get Grafana running using Docker.
   * Configure visualization of graphs in Grafana.
 
-## Praqma
+## Jira using Atlassian Team in Space
 
-Praqma is a partner with Atlassian. We have been given access to their Teams In Space demonstration environment, which is a solution with all their applications integrated and with mocked data included. We containerized it ourselves for demonstration purpose. As a result, we are not allowed to make it public.
+Praqma is a partner with Atlassian. We have been given access to their Teams In Space demonstration environment, which is a solution with all their applications integrated and with mocked data included. We containerized it ourselves for demonstration purpose, but are not allowed to make it public any of it public.
 
 _Unfortunately, if you're not Praqma folks, you will have to use your own Atlassian Jira instance and install the add-ons. Also, adjust the URL and configuration as required below._
 
@@ -63,13 +63,11 @@ start-jira.sh
 
 JQL results should return `89` issues.
 
-## JQL
+## JQL and ScriptRunner
 
-We can serve customize JQL results on a REST endpoint as well. We must make the exported data or metrics compatible for Prometheus.
+We can serve customized JQL results on a REST endpoint as well. We must make the exported data or metrics compatible for Prometheus.
 
 We can use the similar JQL in [get_jira_issues_rest_endpoint.groovy](get_jira_issues_rest_endpoint.groovy) file for ScriptRunner.
-
-## ScriptRunner
 
 * Open Script Console page, under `Jira Administration -> Add-ons, left menu chose Script Console under Scriptrunner`: [Direct link ](http://jira.teamsinspace.com:8080/plugins/servlet/scriptrunner/admin/console).
 
@@ -79,7 +77,7 @@ We can use the similar JQL in [get_jira_issues_rest_endpoint.groovy](get_jira_is
 
 `2018-06-01 07:52:34,516 DEBUG [runner.ScriptRunnerImpl]: Total issues: 89`
 
-## REST Endpoint
+### REST Endpoint
 
 * Use the authenticated browser session to browse below link.
 
@@ -97,13 +95,11 @@ If the above queries does not work, try Chrome to run the script once, before Fi
 
 Adjust the configuration file so it points to your Atlassian Jira instance, DNS or IP. Run Prometheus from Docker environment.
 
-Modify the `basic_auth` section with Atlassian Jira credentials in the [prometheus.yml](prometheus.yml) file. It sets the `Authorization` header on every scrape request with the configured username and password.
-
 We run our Teams In Space in container. So, we use the IP since other docker containers like Prometheus does not know about the DNS.
 
 ```shell
 
-docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' atlassian-metrics_teamsinspace_1
+docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' teams_in_space
 172.18.0.2
 
 ```
@@ -112,26 +108,18 @@ Write yourself a new `prometheus.yml` by copying our template (`prometheus.org`)
 
 ```shell
 
-sed 's/INSERT_JIRA_IP_OR_DNS_NAME_HERE/172.18.0.2/' < prometheus.org > prometheus.yml
+sed 's/INSERT_JIRA_IP_OR_DNS_NAME_HERE/172.18.0.2/g' < prometheus.org > prometheus.yml
 
 ```
 
-Start the environment using `docker-compose` command. Then, execute into the container to start Atlassian Jira.
-
-```shell
-
-docker-compose up
-docker exec -it atlassian-metrics_teamsinspace_1 bash
-source setup.sh
-start-jira
-
-```
+Modify the `basic_auth` section with Atlassian Jira credentials in the [prometheus.yml](prometheus.yml) file created just above. It sets the `Authorization` header on every scrape request with the configured username and password.
 
 Alternatively, run the below command from the root of this repository where the `prometheus.yml` file located.
 
 ```shell
 
 docker run \
+--detach \
 --name prometheus \
 --publish 9090:9090 \
 --volume $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
@@ -143,16 +131,14 @@ prom/prometheus
 
 ```shell
 
-docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' atlassian-metrics_prometheus_1
+docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' prometheus
 172.18.0.3
 
 ```
 
 Use one of the below URLs.
 
-`http://172.17.0.3:9090/`
-
-`http://localhost:9090` : Usually also works with default Docker configurations.
+`http://172.18.0.3:9090/` or `http://localhost:9090` which usually also works with default Docker configurations.
 
 * Our configuration already configure targets in Prometheus, make sure they have green `UP` state. Find them under `Status -> Targets`.
 
@@ -204,7 +190,7 @@ Name: `jira`
 
 Type: `Prometheus`
 
-URL:    `http://172.17.0.3:9090` (**Replace with your Jira server address from above steps**)
+URL:    `http://172.18.0.2:9090` (**Replace with your Jira server address from above steps**)
 
 Access: `Browser`
 
