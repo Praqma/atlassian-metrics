@@ -5,4 +5,4 @@ scrape_configs:
     # params:
     #     token: ['00000000000000000000000000000000000']
     static_configs:
-      - targets: ['172.17.0.2:8080']
+      - targets: ['INSERT_JIRA_IP_OR_DNS_NAME_HERE:8080']
