@@ -6,3 +6,13 @@ scrape_configs:
     #     token: ['00000000000000000000000000000000000']
     static_configs:
       - targets: ['INSERT_JIRA_IP_OR_DNS_NAME_HERE:8080']
+  - job_name: 'jira_scriptrunner_rest_endpoint'
+    scheme: http
+    metrics_path: '/rest/scriptrunner/latest/custom/getStaledIssues'
+    # params:
+    #     token: ['00000000000000000000000000000000000']
+    basic_auth:
+      username: 'USERNAME'
+      password: 'PASSWORD'
+    static_configs:
+      - targets: ['INSERT_JIRA_IP_OR_DNS_NAME_HERE:8080']

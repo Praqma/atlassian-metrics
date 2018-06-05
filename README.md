@@ -1,39 +1,43 @@
 # atlassian-metrics
 
-The below steps will take you through some basic proof-of-concept of scraping data from Jira in two different ways. After that you just need to figure out why you want metrics, the purpose of such and then design the data you need.
+The below steps will take us through some basic proof of concept to scrap data or metrics from Atlassian Jira in two different ways. We need to figure out how we want to visualize certain data or metrics and then design them accordingly.
 
-If we go for Prometheus (inspired by a free availabel add-on for Jira) and Grafana for graphing we can easily get data from Jira in two different ways:
+We will describe how we get data or metrics from Atlassian Jira and visualize them in Prometheus and Grafana.
 
-* Using the [Prometheus Exporter For Jira](https://marketplace.atlassian.com/apps/1217960/prometheus-exporter-for-jira?hosting=server&tab=overview) add-on, which will expose some key metrics on a REST endpoint. Most of the metrics are of operational interest.
-* Using the [ScriptRunner for Jira](https://marketplace.atlassian.com/apps/6820/scriptrunner-for-jira?hosting=cloud&tab=overview) add-on, where you can serve customize JQL results on a REST endpoint as well. You just need to make data available as JSON for Prometheus.
+## Plugins
 
+* [Prometheus Exporter For Jira](https://marketplace.atlassian.com/apps/1217960/prometheus-exporter-for-jira?hosting=server&tab=overview)
 
-## 3 components to serve you
+It expose some key metrics on a REST endpoint. Most of the metrics are of operational interest.
 
-This proof-of-concept is based on three components:
+* [ScriptRunner for Jira](https://marketplace.atlassian.com/apps/6820/scriptrunner-for-jira?hosting=server&tab=overview)
 
-* Atlassian Jira - where we want to get data from.
-* [Prometheus](https://prometheus.io/) - Monitoring system and time series database - we use persist our data.
-* [Grafana](https://grafana.com/) - The Open platform for beautiful analytics and monitoring - that helps us do graphing on the Prometheus data.
+We can serve customize JQL results on a REST endpoint as well. We must make the exported data or metrics compatible for Prometheus.
 
+## Components
 
+* Atlassian Jira, our source of data or metrics being exported for Prometheus.
+* [Prometheus](https://prometheus.io/), the monitoring system and time series database to persist our data.
+* [Grafana](https://grafana.com/), the pen platform for beautiful analytics and monitoring to help us do graphing on the Prometheus data.
 
+### Steps
 
-### The 3 overall steps
+* Get Atlassian Jira up and running with the below two add-ons.
+  * [Prometheus Exporter For Jira](https://marketplace.atlassian.com/apps/1217960/prometheus-exporter-for-jira?hosting=server&tab=overview)
+  * [ScriptRunner for Jira](https://marketplace.atlassian.com/apps/6820/scriptrunner-for-jira?hosting=server&tab=overview)
+* Configure ScriptRunner.
+  * Expose the custom REST endpoint by using [get_jira_issues_rest_endpoint.groovy](get_jira_issues_rest_endpoint.groovy) file.
+* Get Prometheus running using Docker.
+* Get Grafana running using Docker.
+  * Configure visualization of graphs in Grafana.
 
-* Get Jira up and running with the two add-ons: Prometheus Exporter and ScriptRunner
-  * Configure JQL and add ScriptRunner script to expose on REST
-* Get Prometheus running using Docker
-* Get Grafana running using Docker and configure graphs
+## Praqma
 
+Praqma is a partner with Atlassian. We have been given access to their Teams In Space demonstration environment, which is a solution with all their applications integrated and with mocked data included. We containerized it ourselves for demonstration purpose. As a result, we are not allowed to make it public.
 
-## Get Jira running using Team in Space (Praqma only)
+_Unfortunately, if you're not Praqma folks, you will have to use your own Atlassian Jira instance and install the add-ons. Also, adjust the URL and configuration as required below._
 
-Notice we're an Atlassian partner in Praqma, which means we have access to their Teams in Space which is a solution with all their tools integrated and with realistic data already inside. We dockerized it ourselves to use it for demonstration. We're not allowed to make it public.
-
-_If you're not a Praqmate, you'll have to use your own Jira and install the add-ons. Also adjust the URL and configuration below._
-
-* Start Jira from our Teams in Space container, using the adjusted image that includes Prometheus Exporter for Jira add-on.
+* Start Jira from our Teams In Space container, using the adjusted image that includes the related add-ons.
 
 Expect some time for Jira to start up properly. Check the progress of starting Jira under this [page](http://jira.teamsinspace.com:8080).
 
@@ -59,7 +63,7 @@ start-jira.sh
 
 * After indexing completed, check if the JQL query is working properly: `http://jira.teamsinspace.com:8080/issues/?jql=(project%20%3D%20TIS%20and%20assignee%20!%3D%20currentUser()%20and%20updated%20<%3D%20-7d%20and%20resolution%20is%20EMPTY)`
 
-JQL results should return `89` issues.
+JQL results should return `89` issues. We can use the same JQL in [get_jira_issues_rest_endpoint.groovy](get_jira_issues_rest_endpoint.groovy) file for ScriptRunner.
 
 ### ScriptRunner
 
@@ -75,57 +79,96 @@ JQL results should return `89` issues.
 
 * Use the authenticated browser session to browse below link.
 
-`http://jira.teamsinspace.com:8080/rest/scriptrunner/latest/custom/getInactiveIssues`
+`http://jira.teamsinspace.com:8080/rest/scriptrunner/latest/custom/getStaledIssues`
 
 * Use a terminal to use the below command.
 
-`curl -u username:password http://jira.teamsinspace.com:8080/rest/scriptrunner/latest/custom/getInactiveIssues`
+`curl -u username:password http://jira.teamsinspace.com:8080/rest/scriptrunner/latest/custom/getStaledIssues`
 
-_Results_: Both queries should respond with the expected result in json: `{"inactive_issues_count":89}`
+_Results_: Both queries should respond with the expected result: `staled_issues_count 89`
 
-Should you experience issues with the above queries, we once had problems with browser and needed to use Chrome to run the script once, before Firefox could access the REST endpoint. Consider switching to Chrome if the queries doesn't work.
+If the above queries does not work, try Chrome to run the script once, before Firefox could access the REST endpoint.
 
 ## Prometheus
 
-We will run Prometheus from docker, but before doing so you need to adjust the configuration file so it points to your Jira server, DNS or IP.
+Adjust the configuration file so it points to your Atlassian Jira instance, DNS or IP. Run Prometheus from Docker environment.
 
-Since we run our Teams in Space in Docker, we use the IP since other docker containers like Prometheus doesn't know about the DNS we use for it.
+Modify the `basic_auth` section with Atlassian Jira credentials in the [prometheus.yml](prometheus.yml) file. It sets the `Authorization` header on every scrape request with the configured username and password.
 
-    $ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' teams_in_space
-    172.17.0.2
+We run our Teams In Space in container. So, we use the IP since other docker containers like Prometheus does not know about the DNS.
+
+```shell
+
+docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' atlassian-metrics_teamsinspace_1
+172.18.0.2
+
+```
 
 Write yourself a new `prometheus.yml` by copying our template (`prometheus.org`) and inserting the Jira server address. Or simple run:
 
-    sed 's/INSERT_JIRA_IP_OR_DNS_NAME_HERE/172.17.0.2/' < prometheus.org > prometheus.yml
+```shell
 
-Then start it using the configuration, running the following from the root of this repository where your new `prometheus.yml` file is:
+sed 's/INSERT_JIRA_IP_OR_DNS_NAME_HERE/172.18.0.2/' < prometheus.org > prometheus.yml
 
-    docker run --name prometheus -p 9090:9090 -v $(pwd):/etc/prometheus/ prom/prometheus
+```
 
-* Access Prometheus on the browser with the below link, or on the ip-address you get by running inspect to catch ip again:
+Start the environment using `docker-compose` command. Then, execute into the container to start Atlassian Jira.
 
-    $ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' prometheus
-    172.17.0.3
+```shell
 
-`http://172.17.0.3:9090/` or `http://localhost:9090` (usually also works with default docker configurations)
+docker-compose up
+docker exec -it atlassian-metrics_teamsinspace_1 bash
+source setup.sh
+start-jira
 
+```
 
-* Since our configuration already configures targets in Prometheus, make sure they   has green `UP` state. Find them under `Status -> Targets`
+Alternatively, run the below command from the root of this repository where the `prometheus.yml` file located.
+
+```shell
+
+docker run \
+--name prometheus \
+--publish 9090:9090 \
+--volume $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
+prom/prometheus
+
+```
+
+* Access Prometheus on the browser with the below link, or on the IP address you get by running inspect to catch IP again.
+
+```shell
+
+docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' atlassian-metrics_prometheus_1
+172.18.0.3
+
+```
+
+Use one of the below URLs.
+
+`http://172.17.0.3:9090/`
+
+`http://localhost:9090` : Usually also works with default Docker configurations.
+
+* Our configuration already configure targets in Prometheus, make sure they have green `UP` state. Find them under `Status -> Targets`.
 
 ![prometheus_targets](images/prometheus_targets.png)
 
-* Select one of the metrics to be executed under the `Graph`-menu, [direct link](http://localhost:9090/graph).
+* Select one of the metrics to be executed under the top `Graph` [menu](http://localhost:9090/graph).
 
-For select and then execute the `jvm_memory_bytes_used` metric, which is exposed by the Prometheus Exporter add-on. [Direct link](http://localhost:9090/graph?g0.range_input=1h&g0.stacked=1&g0.expr=jvm_memory_bytes_used&g0.tab=0)
+Select and then execute the `jvm_memory_bytes_used` [metric](http://localhost:9090/graph?g0.range_input=1h&g0.stacked=1&g0.expr=jvm_memory_bytes_used&g0.tab=0), which is exposed by the Prometheus Exporter add-on.
 
 You can then click graph to show simple graphs in Prometheus itself.
 
 ![prometheus_graph_jvm_memory_bytes_used](images/prometheus_graph_jvm_memory_bytes_used.png)
 
+Select and then execute the `staled_issues_count` [metric](http://localhost:9090/graph?g0.range_input=1h&g0.stacked=1&g0.expr=staled_issues_count&g0.tab=0), which is exposed by the ScriptRunner add-on.
+
+![prometheus_graph_staled_issues_count](images/prometheus_graph_staled_issues_count.png)
+
 ## Grafana
 
-Grafana have more power for graphing so let's try to fire that up and see a simple graph.
-
+Grafana have more options for graphing. So let us try to fire that up and see a simple graph.
 
 * Run Grafana container image.
 
@@ -139,11 +182,13 @@ grafana/grafana
 
 ```
 
-* Access Grafana on the browser with the below link or use inspect again as above to catch IP address:
+* Access Grafana on the browser with the below link. Else, use inspect again as above to catch IP address.
 
-`http://localhost:3000/` (login, default default username and password from the official hub image (`admin` and pass `admin`)
+`http://localhost:3000/`
 
-Now we will add Prometheus data sources....
+Default username and password is `admin` and `admin` respectively.
+
+Next, add Prometheus data sources.
 
 * Click `Add data sources` button.
 

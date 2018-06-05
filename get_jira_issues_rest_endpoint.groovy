@@ -32,8 +32,18 @@ import javax.ws.rs.core.Response
 
 @BaseScript CustomEndpointDelegate delegate // this line makes methods in your script recognisable as endpoints, and is required
 
+// JSON Format
+// http://jira.teamsinspace.com:8080/rest/scriptrunner/latest/custom/getInactiveIssues
 getInactiveIssues(  //  the name of the REST endpoint, which forms part of the URL
     httpMethod: "GET", groups: ["jira-administrators"]  // configuration of the endpoint, in this case which HTTP verb to handle, and what groups to allow
 ) { MultivaluedMap queryParams, String body ->  // parameters which are provided to your method body
     return Response.ok(new JsonBuilder([inactive_issues_count: results.total]).toString()).build()  // the body of your method, where you will return a javax.ws.rs.core.Response object
+}
+
+// Prometheus Format
+// http://jira.teamsinspace.com:8080/rest/scriptrunner/latest/custom/getStaledIssues
+getStaledIssues(  //  the name of the REST endpoint, which forms part of the URL
+    httpMethod: "GET", groups: ["jira-administrators"]  // configuration of the endpoint, in this case which HTTP verb to handle, and what groups to allow
+) { MultivaluedMap queryParams, String body ->  // parameters which are provided to your method body
+    return Response.ok(new String("staled_issues_count" + " " + results.total)).build()  // the body of your method, where you will return a javax.ws.rs.core.Response object
 }
