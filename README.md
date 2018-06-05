@@ -63,13 +63,13 @@ start-jira.sh
 
 JQL results should return `89` issues.
 
-### JQL
+## JQL
 
 We can serve customize JQL results on a REST endpoint as well. We must make the exported data or metrics compatible for Prometheus.
 
 We can use the similar JQL in [get_jira_issues_rest_endpoint.groovy](get_jira_issues_rest_endpoint.groovy) file for ScriptRunner.
 
-### ScriptRunner
+## ScriptRunner
 
 * Open Script Console page, under `Jira Administration -> Add-ons, left menu chose Script Console under Scriptrunner`: [Direct link ](http://jira.teamsinspace.com:8080/plugins/servlet/scriptrunner/admin/console).
 
@@ -79,7 +79,7 @@ We can use the similar JQL in [get_jira_issues_rest_endpoint.groovy](get_jira_is
 
 `2018-06-01 07:52:34,516 DEBUG [runner.ScriptRunnerImpl]: Total issues: 89`
 
-### REST Endpoint
+## REST Endpoint
 
 * Use the authenticated browser session to browse below link.
 
