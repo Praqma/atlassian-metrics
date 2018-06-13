@@ -221,3 +221,11 @@ Enter `5249` into the field of `Grafana.com Dashboard`. Click `Load` button.
 * Dashboard reflecting Jira metrics will be shown similarly like the below image.
 
 ![grafana_dashboard_jira](images/grafana_dashboard_jira.png)
+
+## Grafana
+
+The Jira JQL query, using ScriptRunner to publish data on REST can be shown easily in Grafana also.
+
+Find an existing Dashboard, chose `Add panel -> Singlestat`. The datasource is there, so just chose the metric `staled_issues_count`.
+
+![Make graph showing the ScriptRunner data from Jira](images/jql-rest-data-from-jira-dashboard-grafana.png)
