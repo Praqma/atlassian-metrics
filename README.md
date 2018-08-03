@@ -1,3 +1,7 @@
+---
+maintainer: buep
+---
+
 # atlassian-metrics
 
 The below steps will take us through some basic proof of concept to scrap data or metrics from Atlassian Jira in two different ways. We need to figure out how we want to visualize certain data or metrics and then design them accordingly.
