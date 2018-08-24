@@ -1,5 +1,5 @@
 ---
-maintainer: buep
+maintainer: moc
 ---
 
 # atlassian-metrics
